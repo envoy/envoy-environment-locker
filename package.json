@@ -1,0 +1,5 @@
+{
+  "name": "envoy-environment-locker",
+  "private": true,
+  "dependencies": {}
+}
