@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  post '/', to: 'queue#action'
+  post '/', to: 'queue#perform_action'
 end
