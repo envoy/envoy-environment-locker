@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe QueueController, type: :controller do
-  describe ".action" do
-    subject { post :action, params: params }
+  describe ".perform_action" do
+    subject { post :perform_action, params: params }
 
     let(:params) do
       {
