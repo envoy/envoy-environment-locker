@@ -43,7 +43,7 @@ RSpec.describe QueueManager do
       describe "for an empty queue" do
         it "returns the expected result" do
           expected_result = {
-            text: "Current queue for staging: "
+            text: "Staging is unclaimed!"
           }
 
           expect(subject).to eq(expected_result)
@@ -73,7 +73,7 @@ RSpec.describe QueueManager do
       describe "for an empty queue" do
         it "returns the expected result" do
           expected_result = {
-            text: "Current queue for staging: "
+            text: "Staging is unclaimed!"
           }
 
           expect(subject).to eq(expected_result)
