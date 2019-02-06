@@ -4,7 +4,7 @@ class QueueManager
   QUEUE_KEY = "env_queue".freeze
 
   def initialize(user_id)
-    @user_id = user_id + rand(10).to_s
+    @user_id = user_id
   end
 
   def perform(action)

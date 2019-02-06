@@ -34,7 +34,6 @@ gem "redis-rails", "~> 5.0.2"
 
 group :development, :test do
   gem 'pry-byebug', "~> 3.6.0"
-  gem "rspec-rails", "~> 3.7.2"
   gem "rubocop", "~> 0.63.0", require: false
 end
 
@@ -53,6 +52,7 @@ group :test do
   gem 'selenium-webdriver'
   # Easy installation and use of chromedriver to run system tests with Chrome
   gem 'chromedriver-helper'
+  gem "rspec-rails", "~> 3.7.2"
   gem "fakeredis", "~> 0.7", require: "fakeredis/rspec"
   gem "stub_env", "~> 1.0"
 end
