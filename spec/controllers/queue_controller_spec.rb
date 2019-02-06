@@ -34,7 +34,6 @@ RSpec.describe QueueController, type: :controller do
       it "informs the client that there was an issue with the request" do
         subject
 
-        expect(response.code).to eq("400")
         expect(JSON.parse(response.body)["text"]).to eq("There was a problem with the request")
       end
     end

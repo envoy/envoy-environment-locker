@@ -7,7 +7,7 @@ class QueueController < ApplicationController
       render json: QueueManager.new(user_id).perform(command)
     rescue => error
       Rails.logger.info(error.message)
-      render json: { text: "There was a problem with the request" }, status: 400
+      render json: { text: "There was a problem with the request" }
     end
   end
 
