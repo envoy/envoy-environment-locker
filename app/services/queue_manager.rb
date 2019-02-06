@@ -57,16 +57,6 @@ class QueueManager
     "<@#{user_id}>"
   end
 
-  # Returns a string
-  def formatted_ordered_queue
-    ordered_queue.join(", ")
-  end
-
-  # Returns a string
-  def current_lock_holder
-    ordered_queue.first
-  end
-
   def slack_message
     "Current queue for staging: #{ordered_queue}"
   end
