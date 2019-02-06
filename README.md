@@ -4,7 +4,7 @@ This is a small app that maintains a queue for the staging environment. It's con
 
 ```
 /lock - locks the staging environment, or hop on the queue if it's already taken
-/unlock - unlocks
+/unlock - unlocks, or hop off the queue
 /queue - shows the current queue
 ```
 
