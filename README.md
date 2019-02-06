@@ -8,7 +8,7 @@ This is a small app that maintains a queue for the staging environment. It's con
 /queue - shows the current queue
 ```
 
-It's hosted on Heroku and maintains the queue in Redis. There is no database dependency.
+It's hosted on [Heroku](https://dashboard.heroku.com/apps/envoy-environment-locker) and maintains the queue in Redis. There is no database dependency.
 
 ### Setup
 
