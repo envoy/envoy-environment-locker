@@ -66,5 +66,35 @@ RSpec.describe QueueManager do
         end
       end
     end
+
+    describe "displaying the queue" do
+      let(:action) { "/queue" }
+
+      describe "for an empty queue" do
+        it "returns the expected result" do
+          expected_result = {
+            text: "Current queue for staging: "
+          }
+
+          expect(subject).to eq(expected_result)
+        end
+      end
+
+      describe "for an existing queue" do
+        before do
+          REDIS.hset('env_queue', user_id_2, 1549410757)
+          REDIS.hset('env_queue', user_id, 1549410777)
+          REDIS.hset('env_queue', user_id_3, 1549411384)
+        end
+
+        it "returns the expected result" do
+          expected_result = {
+            text: "Current queue for staging: <@U8C70UGDA>, <@U8C70UGDM>, <@U8C70UGDB>"
+          }
+
+          expect(subject).to eq(expected_result)
+        end
+      end
+    end
   end
 end
