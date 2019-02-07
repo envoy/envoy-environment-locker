@@ -32,6 +32,8 @@ gem 'bootsnap', '>= 1.1.0', require: false
 
 gem "redis-rails", "~> 5.0.2"
 
+gem "slack-notifier", "~> 2.3.2"
+
 group :development, :test do
   gem 'pry-byebug', "~> 3.6.0"
   gem "rubocop", "~> 0.63.0", require: false

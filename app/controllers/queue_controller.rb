@@ -4,10 +4,11 @@ class QueueController < ApplicationController
   def perform_action
     begin
       validate_token
-      render json: QueueManager.new(user_id).perform(command)
+      QueueManager.new(user_id).perform(command)
+      head 200
     rescue => error
       Rails.logger.info(error.message)
-      render json: { text: "There was a problem with the request" }
+      head 200
     end
   end
 

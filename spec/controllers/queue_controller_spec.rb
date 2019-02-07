@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe QueueController, type: :controller do
   before do
     stub_env("SLACK_SECRET_TOKEN", "abcdefg")
+    allow(SlackNotifier).to receive(:new).and_return(slack_notifier)
   end
 
   describe ".perform_action" do
@@ -17,25 +18,28 @@ RSpec.describe QueueController, type: :controller do
     end
     let(:user_id) { "blah" }
     let(:command) { "/lock" }
+    let(:slack_notifier) { double(:slack_notifier, post: true) }
 
     describe "with a good token" do
       let(:token) { "abcdefg" }
 
-      it "returns a 200 with the current queue" do
+      it "returns a 200 and posts the current queue" do
         subject
 
         expect(response.code).to eq("200")
-        expect(JSON.parse(response.body)["text"]).to eq("Current queue for staging: <@#{user_id}>")
+        expect(SlackNotifier).to have_received(:new).with([user_id])
+        expect(slack_notifier).to have_received(:post)
       end
 
       describe "with an empty queue" do
         let(:command) { "/queue" }
 
-        it "returns a 200 with the empty queue message" do
+        it "returns a 200 and posts the empty queue message" do
           subject
 
           expect(response.code).to eq("200")
-          expect(JSON.parse(response.body)["text"]).to eq("Staging is unclaimed!")
+          expect(SlackNotifier).to have_received(:new).with([])
+          expect(slack_notifier).to have_received(:post)
         end
       end
     end
@@ -43,11 +47,11 @@ RSpec.describe QueueController, type: :controller do
     describe "with a bad token" do
       let(:token) { "zzzzzzzz" }
 
-      it "returns a 200, but informs the client that there was an issue with the request" do
+      it "returns a 200, but does not post a message to the channel" do
         subject
 
-        expect(response.code).to eq("200")
-        expect(JSON.parse(response.body)["text"]).to eq("There was a problem with the request")
+        expect(SlackNotifier).not_to have_received(:new)
+        expect(slack_notifier).not_to have_received(:post)
       end
     end
   end
