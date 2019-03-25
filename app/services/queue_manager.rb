@@ -4,7 +4,10 @@ class QueueManager
   QUEUE_COMMAND = "/queue".freeze
   QUEUE_KEY = "env_queue".freeze
 
-  def initialize(user_id)
+  attr_reader :service
+
+  def initialize(service:, user_id: )
+    @service = service
     @user_id = user_id
   end
 
@@ -20,20 +23,24 @@ class QueueManager
 
   private
 
+  def queue_key
+    "#{QUEUE_KEY}:#{service}"
+  end
+
   def lock
-    REDIS.hset(QUEUE_KEY, @user_id, timestamp) unless already_enqueued?
+    REDIS.hset(queue_key, @user_id, timestamp) unless already_enqueued?
   end
 
   def unlock
-    REDIS.hdel(QUEUE_KEY, @user_id)
+    REDIS.hdel(queue_key, @user_id)
   end
-  
+
   def show_queue
     SlackNotifier.new(ordered_queue).post
   end
 
   def redis_hash
-    REDIS.hgetall(QUEUE_KEY)
+    REDIS.hgetall(queue_key)
   end
 
   def timestamp
@@ -41,7 +48,7 @@ class QueueManager
   end
 
   def already_enqueued?
-    REDIS.hget(QUEUE_KEY, @user_id).present?
+    REDIS.hget(queue_key, @user_id).present?
   end
 
   # Returns an array of user IDs
