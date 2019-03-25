@@ -37,6 +37,7 @@ gem "slack-notifier", "~> 2.3.2"
 group :development, :test do
   gem 'pry-byebug', "~> 3.6.0"
   gem "rubocop", "~> 0.63.0", require: false
+  gem 'dotenv-rails'
 end
 
 group :development do
