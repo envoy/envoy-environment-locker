@@ -1,18 +1,23 @@
+require 'pp'
+
 class QueueManager
   LOCK_COMMAND = "/lock".freeze
   UNLOCK_COMMAND = "/unlock".freeze
   QUEUE_COMMAND = "/queue".freeze
   QUEUE_KEY = "env_queue".freeze
 
-  attr_reader :service
-
-  def initialize(service:, user_id: )
-    @service = service
-    @user_id = user_id
+  def initialize(command)
+    @cmd = command
+    puts @cmd
   end
 
-  def perform(action)
-    case action
+  def perform
+    unless @cmd.valid?
+      notifier.post(text: "Params are invalid. Please make sure you add a service and that the time units are 'hours' or 'minutes'.")
+      return
+    end
+
+    case @cmd.command
     when LOCK_COMMAND
       lock
     when UNLOCK_COMMAND
@@ -24,23 +29,24 @@ class QueueManager
   private
 
   def queue_key
-    "#{QUEUE_KEY}:#{service}"
+    "#{QUEUE_KEY}:#{@cmd.service}"
   end
 
   def lock
-    REDIS.hset(queue_key, @user_id, timestamp) unless already_enqueued?
+    key = "#{@cmd.user_id}:#{@cmd.seconds}"
+    REDIS.zadd(queue_key, timestamp, key) unless already_enqueued?
   end
 
   def unlock
-    REDIS.hdel(queue_key, @user_id)
+    REDIS.zrem(queue_key, user_key)
   end
 
   def show_queue
-    SlackNotifier.new(ordered_queue).post
+    notifier.post_queue(ordered_queue)
   end
 
-  def redis_hash
-    REDIS.hgetall(queue_key)
+  def notifier
+    @notifier ||= SlackNotifier.new(@cmd.response_url)
   end
 
   def timestamp
@@ -48,13 +54,15 @@ class QueueManager
   end
 
   def already_enqueued?
-    REDIS.hget(queue_key, @user_id).present?
+    ordered_queue.map{ |key| key.split(":").first }.include?(@cmd.user_id)
   end
 
   # Returns an array of user IDs
   def ordered_queue
-    redis_hash.sort_by { |k,v| v }.map do |user_with_timestamp|
-      user_with_timestamp.first
-    end
+    REDIS.zrange(queue_key, 0, -1)
+  end
+
+  def user_key
+    ordered_queue.first{ |key| key.starts_with?(@cmd.user_id) }
   end
 end

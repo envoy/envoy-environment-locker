@@ -4,10 +4,11 @@ class QueueController < ApplicationController
   def perform_action
     begin
       validate_token
-      QueueManager.new(service: service, user_id: user_id).perform(command)
+      QueueManager.new(DashCommand.new(params)).perform
       head 200
     rescue => error
       Rails.logger.info(error.message)
+      puts error.backtrace
       head 200
     end
   end
@@ -15,26 +16,6 @@ class QueueController < ApplicationController
   private
 
   def validate_token
-    raise "Invalid token" if token != ENV["SLACK_SECRET_TOKEN"]
-  end
-
-  def user_id
-    params[:user_id]
-  end
-
-  def service
-    if params[:text]
-      params[:text].split.first
-    else
-      "api"
-    end
-  end
-
-  def command
-    params[:command]
-  end
-
-  def token
-    params[:token]
+    raise "Invalid token" if params[:token] != ENV["SLACK_SECRET_TOKEN"]
   end
 end
