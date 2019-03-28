@@ -10,6 +10,15 @@ This is a small app that maintains a queue for the staging environment. It's con
 
 The queue is maintained in Redis, and there is no database dependency.
 
+### Why did we make this?
+
+Envoy has a staging environment that developers can use to test code changes before they're deployed to production. Only one developer should be making changes to the staging environment at a time, so an informal system developed wherein a developer would post in the #staging-checkout Slack channel to see if it was available to use. This ended up causing several problems:
+
+* A non-answer in #staging-checkout didn't necessarily mean staging was available - it could have been that the person using it was busy and didn't see the Slack message.
+* Sometimes many developers would request to use the staging environment around the same time, resulting in confusion and time spent discussing "who gets it next".
+
+We created this tool to maintain a simple queue and give an easy interface for viewing, adding to, and removing from the queue. It's saved us time and decreased confusion.
+
 ### Setup
 
 Clone this repo, make sure you have the correct version of ruby installed, and `bundle install`.
