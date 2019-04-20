@@ -9,7 +9,7 @@ class QueueManager
   def initialize(command)
     @cmd = command
     @service = Service.new(@cmd.service)
-    puts @cmd
+    Rails.logger.info { @cmd }
   end
 
   def perform

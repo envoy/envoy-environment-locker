@@ -5,10 +5,10 @@ class QueueController < ApplicationController
     begin
       validate_token
       QueueManager.new(DashCommand.new(params)).perform
-      head 200
     rescue => error
-      Rails.logger.info(error.message)
-      puts error.backtrace
+      Rails.logger.error(error.message)
+      Rails.logger.error(error.backtrace)
+    ensure
       head 200
     end
   end
