@@ -1,4 +1,4 @@
-require 'pp'
+require "pp"
 
 class QueueManager
   LOCK_COMMAND = "/lock".freeze
@@ -8,6 +8,7 @@ class QueueManager
 
   def initialize(command)
     @cmd = command
+    @service = Service.new(@cmd.service)
     puts @cmd
   end
 
@@ -19,50 +20,20 @@ class QueueManager
 
     case @cmd.command
     when LOCK_COMMAND
-      lock
+      @service.lock(user: @cmd.user_id, seconds: @cmd.seconds)
     when UNLOCK_COMMAND
-      unlock
+      @service.unlock(user: @cmd.user_id)
     end
     show_queue
   end
 
   private
 
-  def queue_key
-    "#{QUEUE_KEY}:#{@cmd.service}"
-  end
-
-  def lock
-    key = "#{@cmd.user_id}:#{@cmd.seconds}"
-    REDIS.zadd(queue_key, timestamp, key) unless already_enqueued?
-  end
-
-  def unlock
-    REDIS.zrem(queue_key, user_key)
-  end
-
   def show_queue
-    notifier.post_queue(ordered_queue)
+    notifier.post_queue(@service.users)
   end
 
   def notifier
     @notifier ||= SlackNotifier.new(@cmd.response_url)
-  end
-
-  def timestamp
-    Time.now.utc.to_i
-  end
-
-  def already_enqueued?
-    ordered_queue.map{ |key| key.split(":").first }.include?(@cmd.user_id)
-  end
-
-  # Returns an array of user IDs
-  def ordered_queue
-    REDIS.zrange(queue_key, 0, -1)
-  end
-
-  def user_key
-    ordered_queue.first{ |key| key.starts_with?(@cmd.user_id) }
   end
 end
