@@ -12,6 +12,8 @@ RSpec.describe Service do
       expect(service.lock(user: user, seconds: 30)).to be_truthy
       expect(service).to be_locked
       expect(service.users).to include(user)
+      rank = REDIS.zscore(Service::LOCKED_KEY, service.name)
+      expect(rank).to be_within(32).of(Time.now.utc.to_i)
     end
 
     describe "with someone else holding the lock" do
@@ -100,6 +102,29 @@ RSpec.describe Service do
       service.expire_lock!
       expect(service).to be_locked
       expect(service.lock_owner).to eql(user)
+    end
+  end
+
+  describe "#extend_lock" do
+    it "extends the lock time for the current holder" do
+      Timecop.freeze do
+        service.lock(user: user, seconds: 30)
+
+        service.extend_lock(seconds: 5)
+        rank = REDIS.zscore(Service::LOCKED_KEY, service.name).to_i
+        expect(rank).to eql(Time.now.utc.to_i + 35)
+      end
+    end
+
+    # Since `zincrby` will add elements to the set if they're not there
+    # we need to keep this test to ensure that the service doesn't get
+    # locked if for some reason someone extends the lock of an unlocked
+    # service.
+    it "does nothing when the service is not locked" do
+      service.extend_lock(seconds: 5)
+      expect(service).not_to be_locked
+      rank = REDIS.zscore(Service::LOCKED_KEY, service.name).to_i
+      expect(rank).to eql(0)
     end
   end
 end

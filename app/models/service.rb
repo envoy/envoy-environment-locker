@@ -48,10 +48,16 @@ class Service
     unlock(user: lock_owner)
   end
 
+  # `extend_lock` will extend the hold lock for X seconds for the lock holder.
+  def extend_lock(seconds:)
+    return unless locked?
+    redis.zincrby(locked_key, seconds, name)
+  end
+
   # `locked?` returns whether the service is locked or not. A service is locked
   # if it's in the sorted set of locked services.
   def locked?
-    !!redis.zrank(LOCKED_KEY, name)
+    !!redis.zrank(locked_key, name)
   end
 
   # `users` returns all users that are in list to acquire the lock in the order that
