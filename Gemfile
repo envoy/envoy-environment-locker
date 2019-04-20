@@ -6,7 +6,7 @@ gem 'rails', '~> 5.2.2'
 gem 'puma', '~> 3.11'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem "redis-rails", "~> 5.0.2"
-gem "slack-notifier", "~> 2.3.2"
+gem "slack-ruby-client", "~> 0.14.2"
 
 group :development, :test do
   gem 'pry-byebug', "~> 3.6.0"
