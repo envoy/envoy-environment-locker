@@ -2,7 +2,7 @@ class DashCommand < OpenStruct
   PARSER = /(?<service>\w+)(\s+for (?<time_value>\d+) (?<time_unit>\w+))?/i
 
   def service
-    matched_data[:service] || "api"
+    matched_data[:service]
   end
 
   def time_unit
@@ -26,14 +26,14 @@ class DashCommand < OpenStruct
   # timestamp or anything similar.
   def seconds
     seconds = time_value * 60 # default to minutes
-    seconds *= 60 if time_unit == "hours"
+    seconds *= 60 if time_unit.start_with?("hour")
     seconds
   end
 
   private
 
   def valid_time_units
-    %w(minutes hours)
+    %w(minute minutes hour hours)
   end
 
   def matched_data
