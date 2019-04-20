@@ -24,16 +24,17 @@ class QueueManager
     when UNLOCK_COMMAND
       @service.unlock(user: @cmd.user_id)
     end
+
     show_queue
   end
 
   private
 
   def show_queue
-    notifier.post_queue(@service.users)
+    notifier.service_status(@cmd)
   end
 
   def notifier
-    @notifier ||= SlackNotifier.new(@cmd.response_url)
+    @notifier ||= SlackNotifier.new
   end
 end
