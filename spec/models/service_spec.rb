@@ -109,10 +109,9 @@ RSpec.describe Service do
     it "extends the lock time for the current holder" do
       Timecop.freeze do
         service.lock(user: user, seconds: 30)
-
         service.extend_lock(seconds: 5)
-        rank = REDIS.zscore(Service::LOCKED_KEY, service.name).to_i
-        expect(rank).to eql(Time.now.utc.to_i + 35)
+
+        expect(service.ttl).to eql(35)
       end
     end
 
@@ -123,8 +122,7 @@ RSpec.describe Service do
     it "does nothing when the service is not locked" do
       service.extend_lock(seconds: 5)
       expect(service).not_to be_locked
-      rank = REDIS.zscore(Service::LOCKED_KEY, service.name).to_i
-      expect(rank).to eql(0)
+      expect(service.ttl).to eql(0)
     end
   end
 end

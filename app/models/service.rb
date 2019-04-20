@@ -72,6 +72,13 @@ class Service
     head.to_s.split(":").first
   end
 
+  # `ttl` returns the number of seconds before the lock should be available. If the service
+  # is unlocked, this returns 0.
+  def ttl
+    score = redis.zscore(locked_key, name).to_i
+    [0, score - timestamp].max
+  end
+
   private
 
   # `head` returns the first element of the sorted set.
