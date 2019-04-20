@@ -29,6 +29,7 @@ group :test do
   gem "rspec-rails", "~> 3.7.2"
   gem "fakeredis", "~> 0.7", require: "fakeredis/rspec"
   gem "stub_env", "~> 1.0"
+  gem "timecop"
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
