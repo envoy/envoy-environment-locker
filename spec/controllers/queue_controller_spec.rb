@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe QueueController, type: :controller do
   before do
@@ -13,33 +13,42 @@ RSpec.describe QueueController, type: :controller do
       {
         user_id: user_id,
         command: command,
-        token: token
+        token: token,
+        text: "#{srv_name} for #{minutes} minutes",
       }
     end
     let(:user_id) { "blah" }
     let(:command) { "/lock" }
-    let(:slack_notifier) { double(:slack_notifier, post: true) }
+    let(:srv_name) { "whatever" }
+    let(:minutes) { "10" }
+    let(:slack_notifier) { double(:slack_notifier, service_status: true) }
 
-    describe "with a good token" do
+    describe "`/lock`ing the queue" do
       let(:token) { "abcdefg" }
 
-      it "returns a 200 and posts the current queue" do
-        subject
+      it "returns a 200 OK and posts the current queue" do
+        post :perform_action, params: params
 
-        expect(response.code).to eq("200")
-        expect(SlackNotifier).to have_received(:new).with([user_id])
-        expect(slack_notifier).to have_received(:post)
+        service = Service.new(srv_name)
+        expect(service).to be_locked
+        expect(service.ttl).to be_within(5).of(600)
+        expect(service.lock_owner).to eql(user_id)
+        expect(response.status).to eq(200)
+        expect(slack_notifier).to have_received(:service_status)
       end
 
-      describe "with an empty queue" do
-        let(:command) { "/queue" }
+      describe "`/unlock`ing the queue" do
+        let(:command) { "/unlock" }
 
-        it "returns a 200 and posts the empty queue message" do
-          subject
+        it "returns a 200 OK and unlocks the service" do
+          service = Service.new(srv_name)
+          service.lock(user: user_id, seconds: 400)
 
-          expect(response.code).to eq("200")
-          expect(SlackNotifier).to have_received(:new).with([])
-          expect(slack_notifier).to have_received(:post)
+          post :perform_action, params: params
+
+          expect(service).not_to be_locked
+          expect(response.status).to eq(200)
+          expect(slack_notifier).to have_received(:service_status)
         end
       end
     end
@@ -47,11 +56,11 @@ RSpec.describe QueueController, type: :controller do
     describe "with a bad token" do
       let(:token) { "zzzzzzzz" }
 
-      it "returns a 200, but does not post a message to the channel" do
-        subject
+      it "returns a 200 OK, but does not post a message to the channel" do
+        post :perform_action, params: params
 
         expect(SlackNotifier).not_to have_received(:new)
-        expect(slack_notifier).not_to have_received(:post)
+        expect(response.status).to eq(200)
       end
     end
   end
