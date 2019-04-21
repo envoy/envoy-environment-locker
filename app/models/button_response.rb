@@ -1,15 +1,17 @@
 class ButtonResponse < OpenStruct
   def handle!
-    return unless service.locked?
-    return if service.lock_owner != user_id
+    if service.lock_owner != user_id || !service.locked?
+      update_message(":negative_squared_cross_mark: Error: You don't hold the lock for #{service.name} anymore")
+      return
+    end
 
     case action
     when "extend"
       service.extend_lock(seconds: 15 * 60)
-      update_message("Perfect! We've added 15 minutes to your lock timer!")
+      update_message(":clock3: We've added 15 minutes to your lock timer!")
     when "unlock"
       service.expire_lock!
-      update_message("Perfect! We've unblocked #{service.name}!")
+      update_message(":shower: Perfect! We've unblocked #{service.name}!")
     end
   end
 
