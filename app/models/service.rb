@@ -4,7 +4,6 @@
 # This class wraps an ordered set in Redis that holds the queue to acquire
 # the lock.
 class Service
-  QUEUE_KEY = "queue".freeze
   LOCKED_KEY = "services:__locked__".freeze
 
   attr_reader :name
@@ -117,7 +116,7 @@ class Service
   end
 
   def queue_key
-    "services:#{name}:#{QUEUE_KEY}"
+    "services:#{name}:queue"
   end
 
   def locked_key

@@ -4,7 +4,6 @@ class QueueManager
   LOCK_COMMAND = "/lock".freeze
   UNLOCK_COMMAND = "/unlock".freeze
   QUEUE_COMMAND = "/queue".freeze
-  QUEUE_KEY = "env_queue".freeze
 
   def initialize(command)
     @cmd = command
