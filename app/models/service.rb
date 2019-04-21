@@ -9,9 +9,15 @@ class Service
 
   attr_reader :name
 
-  def initialize(name)
+  def initialize(name, notifier = nil)
     @name = name
     raise ArgumentError.new("Service name cannot be empty") if name.empty?
+
+    @notifier = notifier
+    if @notifier.nil?
+      klass = Rails.env.test? ? NullNotifier : TextNotifier
+      @notifier = klass.new
+    end
   end
 
   # `lock` will request the service's lock and if successful it'll mark the
@@ -128,12 +134,19 @@ class Service
 
     seconds = head.to_s.split(":").last.to_i
     locked_until = timestamp + seconds
-    redis.zadd(locked_key, locked_until, name) unless seconds.zero?
+
+    unless seconds.zero?
+      redis.zadd(locked_key, locked_until, name).tap do
+        @notifier.dm(user: lock_owner, text: "You just acquired the lock to *#{name}*!")
+      end
+    end
   end
 
   # `unlock!` marks the service as available for someone else to acquire the lock.
   def unlock!
-    redis.zrem(locked_key, name)
+    if redis.zrem(locked_key, name)
+      @notifier.dm(user: lock_owner, text: "Your lock on *#{name}* has expired")
+    end
   end
 
   def timestamp

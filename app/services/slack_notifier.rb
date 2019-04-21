@@ -4,8 +4,6 @@ class SlackNotifier
   def service_status(event)
     service = Service.new(event.service)
 
-    Rails.logger.info("Service status on #{event.channel_id}, #{event.user_id}")
-
     if service.locked?
       ephemeral(reply_to(event, "Current queue for *#{service.name}*:\n\n#{formatted_ordered_queue(service)}"))
     else
@@ -31,11 +29,11 @@ class SlackNotifier
     })
   end
 
-  private
-
   def dm(user:, text:, **args)
     notifier.chat_postMessage(args.merge(channel: user, text: text, as_user: true))
   end
+
+  private
 
   def ephemeral(text:, user:, channel:, **args)
     notifier.chat_postEphemeral(args.merge(text: text, user: user, channel: channel, as_user: true))
@@ -60,7 +58,7 @@ class SlackNotifier
   # `recently_warned?` returns true if we've sent a warning about a service in the last 5 minutes
   def recently_warned?(service)
     warned_on = REDIS.get(alert_key(service)).to_i
-    Time.now.utc - warned_on < 5 * 60
+    Time.now.utc.to_i - warned_on < 10 * 60
   end
 
   def alert_key(name)

@@ -14,7 +14,7 @@ class DashCommand < OpenStruct
   end
 
   def to_s
-    "#{user_name} is requesting to #{command} #{service} for #{time_value} #{time_unit}"
+    "#{user_name} is requesting to #{command} #{service} for #{time_value} #{time_unit} (#{seconds} seconds)"
   end
 
   def valid?
