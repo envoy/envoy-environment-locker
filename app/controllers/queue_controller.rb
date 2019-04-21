@@ -13,9 +13,22 @@ class QueueController < ApplicationController
     end
   end
 
+  def extend
+    begin
+      pld = JSON.parse(params[:payload])
+      validate_token(pld["token"])
+      ButtonResponse.new(pld).handle!
+    rescue => error
+      Rails.logger.info(error.message)
+      puts error.backtrace
+    ensure
+      head 200
+    end
+  end
+
   private
 
-  def validate_token
-    raise "Invalid token" if params[:token] != ENV["SLACK_SECRET_TOKEN"]
+  def validate_token(token = params[:token])
+    raise "Invalid token" if token != ENV["SLACK_SECRET_TOKEN"]
   end
 end
