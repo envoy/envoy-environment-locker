@@ -41,5 +41,3 @@ RSpec.describe DashCommand do
     end
   end
 end
-
-# Parameters: {"token"=>"in8g68Jq7T6FimKNeiH9mx2K", "team_id"=>"T024GCGSK", "team_domain"=>"splicechat", "channel_id"=>"C2JQQKQSF", "channel_name"=>"ask-a-bot-staging", "user_id"=>"U30FZH0MD", "user_name"=>"nhocki", "command"=>"/lock", "text"=>"api for 10 minutes", "response_url"=>"https://hooks.slack.com/commands/T024GCGSK/614106738917/zvr2rSA6HrKtnY6TJTyzxhAD", "trigger_id"=>"615985463175.2152424903.2b0570fbd5934dda21836c1770d7f32b"}
