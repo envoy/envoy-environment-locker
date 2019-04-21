@@ -13,7 +13,7 @@ class QueueController < ApplicationController
     end
   end
 
-  def extend
+  def button_hook
     begin
       pld = JSON.parse(params[:payload])
       validate_token(pld["token"])
