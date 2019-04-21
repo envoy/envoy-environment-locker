@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+
+AutoExpirer.expire_all!
