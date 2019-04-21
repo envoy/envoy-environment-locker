@@ -4,17 +4,22 @@ class SlackNotifier
   def service_status(event)
     service = Service.new(event.service)
 
+    Rails.logger.info("Service status on #{event.channel_id}, #{event.user_id}")
+
     if service.locked?
-      ephemeral(reply_with("Current queue for *#{service.name}*:\n\n#{formatted_ordered_queue(service)}"))
+      ephemeral(reply_to(event, "Current queue for *#{service.name}*:\n\n#{formatted_ordered_queue(service)}"))
     else
-      ephemeral(reply_with("#{service.name} is unlocked!"))
+      ephemeral(reply_to(event, "#{service.name} is unlocked!"))
     end
   end
 
   def expiration_warning(service)
     return unless service.locked?
 
-    dm(expiration_warning_payload(service).merge(user: service.lock_owner))
+    unless recently_warned?(service.name)
+      dm(expiration_warning_payload(service).merge(user: service.lock_owner))
+      REDIS.setex(alert_key(service.name), 300, Time.now.utc.to_i)
+    end
   end
 
   def remove_attachments(msg, text:)
@@ -33,10 +38,10 @@ class SlackNotifier
   end
 
   def ephemeral(text:, user:, channel:, **args)
-    notifier.chat_postEphemeral(args.merge(text: text, user: user, channel: channel))
+    notifier.chat_postEphemeral(args.merge(text: text, user: user, channel: channel, as_user: true))
   end
 
-  def reply_with(text)
+  def reply_to(event, text)
     {
       channel: event.channel_id,
       user: event.user_id,
@@ -50,6 +55,16 @@ class SlackNotifier
       client.auth_test
       client
     end
+  end
+
+  # `recently_warned?` returns true if we've sent a warning about a service in the last 5 minutes
+  def recently_warned?(service)
+    warned_on = REDIS.get(alert_key(service)).to_i
+    Time.now.utc - warned_on < 5 * 60
+  end
+
+  def alert_key(name)
+    "alerted:#{name}"
   end
 
   def formatted_ordered_queue(service)
